@@ -71,6 +71,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.3.0",
     "lint-staged": "^10.4.0",
+    "parcel": "^2.8.3",
     "prettier": "^1.19.1"
   }
 }
