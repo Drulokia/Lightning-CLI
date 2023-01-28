@@ -1,4 +1,20 @@
 {
-  "extends": ["@parcel/config-default"],
-  "reporters":  ["...", "@parcel/reporter-dev-server"]
+  "extends": [
+    "@parcel/config-default"
+  ],
+  "reporters": [
+    "...",
+    "@parcel/reporter-dev-server"
+  ],
+  "runtimes": [
+    "parcel-runtime-lightningjs",
+    "..."
+  ],
+  "namers": [
+    "parcel-namer-lightningjs"
+  ],
+  "resolvers": [
+    "parcel-resolver-lightningjs",
+    "..."
+  ]
 }

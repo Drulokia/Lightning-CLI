@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+const { Parcel } = require('@parcel/core')
 const shell = require('shelljs')
 const fs = require('fs')
 const execa = require('execa')
@@ -156,6 +157,8 @@ const readJson = fileName => {
 const bundleEs6App = (folder, metadata, options = {}) => {
   if (process.env.LNG_BUNDLER === 'esbuild') {
     return buildAppEsBuild(folder, metadata, 'es6', options)
+  } else if (process.env.LNG_BUNDLER === 'parcel') {
+    return buildAppParcel(folder, metadata, 'es6', options)
   } else {
     return bundleAppRollup(folder, metadata, 'es6', options)
   }
@@ -164,8 +167,28 @@ const bundleEs6App = (folder, metadata, options = {}) => {
 const bundleEs5App = (folder, metadata, options = {}) => {
   if (process.env.LNG_BUNDLER === 'esbuild') {
     return buildAppEsBuild(folder, metadata, 'es5', options)
+  } else if (process.env.LNG_BUNDLER === 'parcel') {
+    return buildAppParcel(folder, metadata, 'es5', options)
   } else {
     return bundleAppRollup(folder, metadata, 'es5', options)
+  }
+}
+const buildAppParcel = async (folder, metadata, type) => {
+  spinner.start(
+    `Building ${type.toUpperCase()} appBundle using [parcel] and saving to ${folder
+      .split('/')
+      .pop()}`
+  )
+
+  try {
+    const getConfig = require(`../configs/parcel.${type}.config`)
+    await new Parcel(getConfig(folder, makeSafeAppId(metadata))).watch()
+
+    spinner.succeed()
+    return metadata
+  } catch (e) {
+    console.error(e)
+    process.env.LNG_BUILD_EXIT_ON_FAIL === 'true' && process.exit(1)
   }
 }
 
@@ -338,6 +361,26 @@ const ensureCorrectSdkDependency = () => {
   }
 }
 
+const ensureCorrectPackageValues = () => {
+  // Add Settings required for Parcel builder
+  const origPackageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json')))
+  fs.writeFileSync(
+    path.join(process.cwd(), 'package.json'),
+    JSON.stringify(
+      {
+        ...origPackageJson,
+        '@parcel/transformer-js': {
+          inlineFS: false, //https://parceljs.org/features/node-emulation/#inlining-fs.readfilesync
+          inlineEnvironment: ['APP_*', 'NODE_ENV'], //https://parceljs.org/features/node-emulation/#environment-variables
+        },
+      },
+      null,
+      2
+    )
+  )
+  return
+}
+
 const getAppVersion = () => {
   return require(path.join(process.cwd(), 'metadata.json')).version
 }
@@ -423,6 +466,7 @@ module.exports = {
   getEnvAppVars,
   ensureCorrectGitIgnore,
   ensureCorrectSdkDependency,
+  ensureCorrectPackageValues,
   getAppVersion,
   getSdkVersion,
   getCliVersion,

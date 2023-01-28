@@ -28,7 +28,6 @@ const chalk = require('chalk')
 
 const createAction = require('../src/actions/create')
 const buildAction = require('../src/actions/build')
-const buildActionParcel = require('../src/actions/buildparcel')
 const distAction = require('../src/actions/dist')
 const uploadAction = require('../src/actions/upload')
 const serveAction = require('../src/actions/serve')
@@ -72,33 +71,6 @@ program
 
     updateCheck()
       .then(() => buildAction(true, null, selectedTypes.length ? selectedTypes : defaultTypes))
-      .catch(e => {
-        console.error(e)
-        process.exit(1)
-      })
-  })
-
-program
-  .command('buildparcel')
-  .description(
-    [
-      '👷‍♂️',
-      ' '.repeat(3),
-      'Build a local development version of the Lightning App with Parcel',
-    ].join('')
-  )
-  .action(options => {
-    const input = options.opts()
-    const defaultTypes = ['default']
-
-    const selectedTypes = Object.keys(input)
-      .map(type => input[type] === true && type.toLocaleLowerCase())
-      .filter(val => !!val)
-
-    updateCheck()
-      .then(() =>
-        buildActionParcel(true, null, selectedTypes.length ? selectedTypes : defaultTypes)
-      )
       .catch(e => {
         console.error(e)
         process.exit(1)

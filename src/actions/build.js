@@ -40,6 +40,7 @@ module.exports = (clear = false, change = null, types = ['default']) => {
     () => buildHelpers.ensureLightningApp(),
     () => clear && buildHelpers.ensureCorrectGitIgnore(),
     () => clear && buildHelpers.ensureCorrectSdkDependency(),
+    () => clear && buildHelpers.ensureCorrectPackageValues(),
     () => clear && buildHelpers.removeFolder(targetDir),
     () => buildHelpers.ensureFolderExists(targetDir),
     () => clear && buildHelpers.copySupportFiles(targetDir),
