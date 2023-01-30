@@ -182,7 +182,7 @@ const buildAppParcel = async (folder, metadata, type) => {
 
   try {
     const getConfig = require(`../configs/parcel.${type}.config`)
-    await new Parcel(getConfig(folder, makeSafeAppId(metadata))).watch()
+    await new Parcel(getConfig(folder, makeSafeAppId(metadata))).run()
 
     spinner.succeed()
     return metadata
