@@ -1,4 +1,3 @@
-const buildHelpers = require('../helpers/build')
 const path = require('path')
 
 module.exports = (folder, globalName) => {
@@ -20,13 +19,13 @@ module.exports = (folder, globalName) => {
     mode: 'development', //'development' | 'production'
     targets: {
       modern: {
+        optimize: false,
         context: 'browser',
         sourceMap: sourcemap,
         distDir: folder, // The out directory to put the build files in, defaults to dist (Not used when using targets)
       },
     },
     defaultTargetOptions: {
-      shouldOptimize: false, // Minifies the output file, defaults to process.env.NODE_ENV === 'production'
       shouldScopeHoist: true, //Defaults to false
       publicUrl: './', // The url to serve on, defaults to dist
       outputFormat: 'commonjs', //'esmodule' | 'commonjs' | 'global'

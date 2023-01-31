@@ -173,7 +173,7 @@ const bundleEs5App = (folder, metadata, options = {}) => {
     return bundleAppRollup(folder, metadata, 'es5', options)
   }
 }
-const buildAppParcel = async (folder, metadata, type) => {
+const buildAppParcel = async (folder, metadata, type, options) => {
   spinner.start(
     `Building ${type.toUpperCase()} appBundle using [parcel] and saving to ${folder
       .split('/')
@@ -182,7 +182,15 @@ const buildAppParcel = async (folder, metadata, type) => {
 
   try {
     const getConfig = require(`../configs/parcel.${type}.config`)
-    await new Parcel(getConfig(folder, makeSafeAppId(metadata))).run()
+    let config = getConfig(folder, makeSafeAppId(metadata))
+
+    if (options.sourcemaps === false) config.targets.modern.sourceMap = false
+    if (options.mode === 'production') {
+      config.mode = 'production'
+      config.targets.modern.optimize = true
+    }
+
+    await new Parcel(config).run()
 
     spinner.succeed()
     return metadata
