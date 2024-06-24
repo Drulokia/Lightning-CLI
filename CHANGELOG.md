@@ -1,5 +1,52 @@
 # Changelog
 
+## v2.14.2
+
+*15 apr 2024*
+
+- Fixed issue related to custom config file extension for both esbuild & rollup.
+
+## v2.14.1
+
+*11 apr 2024*
+
+- Fixed issues related to custom config implementations for both esbuild & rollup ([#257](https://github.com/rdkcentral/Lightning-CLI/issues/257))
+
+## v2.14.0
+
+*03 apr 2024*
+
+- Added support for providing a custom rollup configuration ([#254](https://github.com/rdkcentral/Lightning-CLI/issues/254))
+- Added support for providing a custom esbuild configuration ([#255](https://github.com/rdkcentral/Lightning-CLI/issues/255))
+
+
+## v2.13.0
+
+*26 oct 2023*
+
+- Added unit tests for CLI ([#251](https://github.com/rdkcentral/Lightning-CLI/issues/251))
+- Added support for esbuild and rollup bundler options. ([#249](https://github.com/rdkcentral/Lightning-CLI/issues/249))
+- Updated bundler config files to maintain consistency. ([#242](https://github.com/rdkcentral/Lightning-CLI/issues/242))
+
+## v2.12.0
+
+*27 jul 2023*
+
+- Fixed issue with rollup typescript project throwing error when accessing process env ([#235](https://github.com/rdkcentral/Lightning-CLI/issues/235))
+- Added "include" config in tsconfig.json for lng create command
+- Added support for getting "esEnv" from settings.json file for lng dist ([#224](https://github.com/rdkcentral/Lightning-CLI/issues/224))
+- Added support for transpiling .mjs files to ES5 with rollup
+- Fixed the issue related to Babel ignore is not possible to use in a babel.config.json ([#177](https://github.com/rdkcentral/Lightning-CLI/issues/177))
+
+## v2.11.0
+
+*28 apr 2023*
+
+- Removed license texts from fixtures, so new Apps created with the CLI don't come with unnecessary licenses anymore ([#226](https://github.com/rdkcentral/Lightning-CLI/issues/226))
+- Fixed build issue related to rollup path when using NPX. Solves issue for Metrological CLI. ([#222](https://github.com/rdkcentral/Lightning-CLI/issues/222))
+- Fixed issue where sourcemap files were not generated when using esbuild ([#228](https://github.com/rdkcentral/Lightning-CLI/issues/228))
+- Added support for CORS in `lng serve` via a new environment variable (`LNG_SERVE_CORS`)
+
 ## v2.10.0
 
 *15 feb 2023*

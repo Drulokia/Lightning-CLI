@@ -24,10 +24,16 @@ const buildHelpers = require('../helpers/build')
 const distHelpers = require('../helpers/dist')
 const distWatch = require('../helpers/distWatch')
 
-module.exports = options => {
+module.exports = (options, bundlerConfig) => {
   const baseDistDir = path.join(process.cwd(), process.env.LNG_DIST_FOLDER || 'dist')
 
   let metadata
+  let settingsFileName = buildHelpers.getSettingsFileName()
+  let settings
+
+  const buildES = (type, esEnv) => {
+    return !!(type || esEnv)
+  }
 
   const dist = (type, config) => {
     let distDir
@@ -36,6 +42,13 @@ module.exports = options => {
       () => distHelpers.moveOldDistFolderToBuildFolder(),
       () => buildHelpers.ensureCorrectGitIgnore(),
       () => buildHelpers.readMetadata().then(result => (metadata = result)),
+      () => buildHelpers.readSettings(settingsFileName).then(result => (settings = result)),
+      () =>
+        (type = !type.includes('defaults')
+          ? type
+          : settings.platformSettings.esEnv
+          ? settings.platformSettings.esEnv
+          : 'es6'),
       () => {
         distDir = path.join(baseDistDir, type)
       },
@@ -53,10 +66,12 @@ module.exports = options => {
       () => buildHelpers.copyStaticFolder(distDir),
       () =>
         type === 'es6' &&
-        buildHelpers.bundleEs6App(path.join(distDir, 'js'), metadata, { sourcemaps: false }),
+        buildES('es6', settings.platformSettings.esEnv) &&
+        buildHelpers.bundleEs6App(path.join(distDir, 'js'), metadata, bundlerConfig),
       () =>
         type === 'es5' &&
-        buildHelpers.bundleEs5App(path.join(distDir, 'js'), metadata, { sourcemaps: false }),
+        buildES('es5', settings.platformSettings.esEnv) &&
+        buildHelpers.bundleEs5App(path.join(distDir, 'js'), metadata, bundlerConfig),
       () => type === 'es5' && buildHelpers.bundlePolyfills(path.join(distDir, 'js')),
       () => config.isWatchEnabled && distWatch(type),
     ])

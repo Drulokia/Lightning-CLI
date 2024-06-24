@@ -28,15 +28,24 @@ const babelPluginTransFormSpread = require('@babel/plugin-transform-spread')
 const babelPluginTransFormParameters = require('@babel/plugin-transform-parameters')
 const babelPluginClassProperties = require('@babel/plugin-proposal-class-properties')
 const babelPluginInlineJsonImport = require('babel-plugin-inline-json-import')
+const deepMerge = require('deepmerge')
+const fs = require('fs')
+const chalk = require('chalk')
+
+let customConfig
+
+if (process.env.LNG_CUSTOM_ESBUILD === 'true') {
+  const customConfigPath = path.join(process.cwd(), 'esbuild.es5.config.js')
+  if (fs.existsSync(customConfigPath)) {
+    customConfig = require(customConfigPath)
+  } else {
+    console.warn(
+      chalk.yellow('\nCustom esbuild config not found while LNG_CUSTOM_ESBUILD is set to true')
+    )
+  }
+}
 
 module.exports = (folder, globalName) => {
-  const sourcemap =
-    process.env.LNG_BUILD_SOURCEMAP === 'true'
-      ? true
-      : process.env.LNG_BUILD_SOURCEMAP === 'inline'
-      ? 'inline'
-      : false
-
   // Load .env config every time build is triggered
   const appVars = {
     NODE_ENV: process.env.NODE_ENV,
@@ -50,7 +59,7 @@ module.exports = (folder, globalName) => {
   defined['process.env.NODE_ENV'] = `"${process.env.NODE_ENV}"`
   const minify = process.env.LNG_BUILD_MINIFY === 'true' || process.env.NODE_ENV === 'production'
 
-  return {
+  let defaultConfig = {
     plugins: [
       alias([
         { find: '@', filter: /@\//, replace: path.resolve(process.cwd(), 'src/') },
@@ -101,7 +110,14 @@ module.exports = (folder, globalName) => {
     target: 'es5',
     mainFields: buildHelpers.getResolveConfigForBundlers(),
     outfile: `${folder}/appBundle.es5.js`,
-    sourcemap,
+    sourcemap:
+      process.env.NODE_ENV === 'production'
+        ? 'external'
+        : process.env.LNG_BUILD_SOURCEMAP === 'inline'
+        ? 'inline'
+        : process.env.LNG_BUILD_SOURCEMAP === 'false'
+        ? ''
+        : 'external',
     format: 'iife',
     define: defined,
     globalName,
@@ -117,4 +133,9 @@ module.exports = (folder, globalName) => {
       ].join(os.EOL),
     },
   }
+  if (customConfig && 'entryPoints' in customConfig) {
+    delete defaultConfig.entryPoints
+  }
+  const finalConfig = customConfig ? deepMerge(defaultConfig, customConfig) : defaultConfig
+  return finalConfig
 }

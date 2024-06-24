@@ -19,6 +19,7 @@
 
 const path = require('path')
 const process = require('process')
+const fs = require('fs')
 const babel = require('@rollup/plugin-babel').babel
 const babelPluginClassProperties = require('@babel/plugin-proposal-class-properties')
 const babelPresetTypescript = require('@babel/preset-typescript')
@@ -30,13 +31,29 @@ const json = require('@rollup/plugin-json')
 const virtual = require('@rollup/plugin-virtual')
 const inject = require('@rollup/plugin-inject')
 const image = require('@rollup/plugin-image')
+const typescript = require('@rollup/plugin-typescript')
 const buildHelpers = require(path.join(__dirname, '../helpers/build'))
 const minify = require('rollup-plugin-terser').terser
 const license = require('rollup-plugin-license')
 const os = require('os')
 const extensions = ['.js', '.ts']
+const deepMerge = require('deepmerge')
+const chalk = require('chalk')
 
-module.exports = {
+let customConfig
+
+if (process.env.LNG_CUSTOM_ROLLUP === 'true') {
+  const customConfigPath = path.join(process.cwd(), 'rollup.es6.config.js')
+  if (fs.existsSync(customConfigPath)) {
+    customConfig = require(customConfigPath)
+  } else {
+    console.warn(
+      chalk.yellow('\nCustom rollup config not found while LNG_CUSTOM_ROLLUP is set to true')
+    )
+  }
+}
+
+const defaultConfig = {
   onwarn(warning, warn) {
     if (warning.code !== 'CIRCULAR_DEPENDENCY') {
       warn(warning)
@@ -45,6 +62,7 @@ module.exports = {
   plugins: [
     json(),
     image(),
+    fs.existsSync(path.join(process.cwd(), 'tsconfig.json')) && typescript(),
     inject({
       'process.env': 'processEnv',
     }),
@@ -116,3 +134,6 @@ module.exports = {
         : process.env.LNG_BUILD_SOURCEMAP,
   },
 }
+
+const finalConfig = customConfig ? deepMerge(defaultConfig, customConfig) : defaultConfig
+module.exports = finalConfig
